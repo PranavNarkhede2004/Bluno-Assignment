@@ -17,7 +17,7 @@ A full-stack, real-time auction platform to facilitate the NPL bidding process.
 
 ### Prerequisites
 1. Node.js installed (v18+)
-2. Local MongoDB server running at `127.0.0.1:27017`
+2. MongoDB Atlas database is already configured and seeded
 
 ### Backend Setup
 1. Open a terminal and run:
@@ -25,12 +25,7 @@ A full-stack, real-time auction platform to facilitate the NPL bidding process.
    cd server
    npm install
    ```
-2. Your local MongoDB should be running.
-3. **Seed the Database** with NPL data:
-   ```bash
-   node seed/seed.js
-   ```
-4. Start the server (runs on port 5000):
+2. Start the server (runs on port 5000):
    ```bash
    npm run dev
    ```
