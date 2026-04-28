@@ -5,7 +5,10 @@ const Team = require('../models/Team');
 // Helper to broadcast full session to clients
 const broadcastSessionUpdate = async (io) => {
   try {
-    const session = await AuctionSession.findOne().populate('currentPlayer').populate('currentBidder');
+    const session = await AuctionSession.findOne()
+      .populate('currentPlayer')
+      .populate('currentBidder')
+      .populate('bidHistory.team', 'name');
     io.emit('auction:update', session);
   } catch (err) {
     console.error('Error broadcasting session update:', err);
@@ -14,7 +17,10 @@ const broadcastSessionUpdate = async (io) => {
 
 exports.getSession = async (req, res) => {
   try {
-    let session = await AuctionSession.findOne().populate('currentPlayer').populate('currentBidder', 'name');
+    let session = await AuctionSession.findOne()
+      .populate('currentPlayer')
+      .populate('currentBidder', 'name')
+      .populate('bidHistory.team', 'name');
     if (!session) {
       session = await AuctionSession.create({});
     }
@@ -179,8 +185,8 @@ exports.resetAuction = async (req, res) => {
     await Player.updateMany({}, { $set: { status: 'Available', soldTo: null, soldPrice: null } });
     const teams = await Team.find();
     for (const team of teams) {
-      // Assuming initial budget was 15000, resetting
-      team.budget = 15000;
+      // Resetting based on logic
+      team.budget = team.initialBudget || 15000;
       team.players = [];
       team.totalSpent = 0;
       await team.save();

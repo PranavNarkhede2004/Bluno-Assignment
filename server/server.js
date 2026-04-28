@@ -1,4 +1,13 @@
 require('dotenv').config();
+
+const requiredEnv = ['MONGO_URI', 'PORT'];
+requiredEnv.forEach(key => {
+  if (!process.env[key]) {
+    console.error(`FATAL: Missing required environment variable: ${key}`);
+    process.exit(1);
+  }
+});
+
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -33,7 +42,7 @@ app.use('/api/teams', teamRoutes);
 app.use('/api/auction', auctionRoutes);
 
 // MongoDB Connection
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/npl_auction';
+const MONGO_URI = (process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/npl_auction').trim().replace(/^['"]|['"]$/g, '');
 mongoose.connect(MONGO_URI)
   .then(() => console.log('MongoDB Connected'))
   .catch((err) => console.error('MongoDB connection error:', err));

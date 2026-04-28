@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
+import { toast } from 'react-hot-toast';
 import { useAuction } from '../context/AuctionContext';
 import PlayerCard from '../components/PlayerCard';
 import { IndianRupee, Shield } from 'lucide-react';
@@ -18,14 +19,11 @@ const TeamDashboard = () => {
 
   const fetchTeam = async () => {
     try {
-      // In a real app we'd fetch by ID, but for the assignment let's fetch all and pick by index (since we seed 4)
-      const res = await axios.get(`${apiUrl}/api/teams`);
-      const teams = res.data;
-      if (teams.length >= teamId) {
-        setTeam(teams[teamId - 1]);
-      }
+      const res = await axios.get(`${apiUrl}/api/teams/${teamId}`);
+      setTeam(res.data);
     } catch (err) {
       console.error('Error fetching team:', err);
+      toast.error('Failed to load team data');
     }
   };
 
@@ -47,13 +45,22 @@ const TeamDashboard = () => {
         amount: Number(bidAmount)
       });
     } catch (err) {
-      alert(err.response?.data?.error || 'Error placing bid');
+      toast.error(err.response?.data?.error || 'Error placing bid');
     } finally {
       setPlacingBid(false);
     }
   };
 
-  if (!team) return <div className="text-center p-8 text-slate-400">Loading team data...</div>;
+  if (!team) return (
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="lg:col-span-2 space-y-6">
+        <div className="h-[400px] bg-slate-800 rounded-2xl animate-pulse"></div>
+      </div>
+      <div className="lg:col-span-1 space-y-6">
+        <div className="h-[500px] bg-slate-800 rounded-2xl animate-pulse"></div>
+      </div>
+    </div>
+  );
 
   const isAuctionActive = session?.status === 'Active' && session?.currentPlayer;
   const isHighestBidder = session?.currentBidder?._id === team._id || session?.currentBidder === team._id;
@@ -138,7 +145,13 @@ const TeamDashboard = () => {
               <div key={p._id} className="bg-slate-900/50 p-3 rounded-lg flex justify-between items-center border border-white/5">
                 <div>
                   <p className="font-medium text-white">{p.name}</p>
-                  <p className="text-xs text-slate-400">{p.skillSet}</p>
+                  <span className={`text-xs px-2 py-0.5 rounded-full mt-1 inline-block ${
+                    p.skillSet === 'Batting' ? 'bg-blue-500/20 text-blue-400' :
+                    p.skillSet === 'Bowling' ? 'bg-red-500/20 text-red-400' :
+                    'bg-green-500/20 text-green-400'
+                  }`}>
+                    {p.skillSet}
+                  </span>
                 </div>
                 <div className="font-mono font-semibold text-brand-400">
                   ₹{p.soldPrice}
@@ -146,7 +159,7 @@ const TeamDashboard = () => {
               </div>
             ))}
             {team.players.length === 0 && (
-              <p className="text-slate-500 text-sm italic">No players secrued yet.</p>
+              <p className="text-slate-500 text-sm italic">No players secured yet.</p>
             )}
           </div>
         </div>

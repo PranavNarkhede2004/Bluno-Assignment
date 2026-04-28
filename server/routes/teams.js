@@ -18,11 +18,17 @@ router.get('/', async (req, res) => {
 
 /**
  * @route GET /api/teams/:id
- * @desc Get single team by id
+ * @desc Get single team by id or shortId
  */
 router.get('/:id', async (req, res) => {
   try {
-    const team = await Team.findById(req.params.id).populate('players');
+    const id = req.params.id;
+    let team;
+    if (id.length < 5 && !isNaN(id)) {
+      team = await Team.findOne({ shortId: Number(id) }).populate('players');
+    } else {
+      team = await Team.findById(id).populate('players');
+    }
     if (!team) return res.status(404).json({ error: 'Team not found' });
     res.json(team);
   } catch (err) {

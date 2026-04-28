@@ -1,6 +1,11 @@
 const mongoose = require('mongoose');
 
 const teamSchema = new mongoose.Schema({
+  shortId: {
+    type: Number,
+    required: true,
+    unique: true,
+  },
   name: {
     type: String,
     required: true,
@@ -11,6 +16,10 @@ const teamSchema = new mongoose.Schema({
     required: true,
   },
   budget: {
+    type: Number,
+    default: 15000,
+  },
+  initialBudget: {
     type: Number,
     default: 15000,
   },

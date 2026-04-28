@@ -1,18 +1,25 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
 import io from 'socket.io-client';
 import axios from 'axios';
+import toast from 'react-hot-toast';
 
 const AuctionContext = createContext();
 
 const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-const socket = io(SOCKET_URL);
 
 export const useAuction = () => useContext(AuctionContext);
 
 export const AuctionProvider = ({ children }) => {
+  const socketRef = useRef(null);
+  if (!socketRef.current) {
+    socketRef.current = io(SOCKET_URL);
+  }
+  const socket = socketRef.current;
+
   const [session, setSession] = useState(null);
   const [isConnected, setIsConnected] = useState(socket.connected);
   const [loading, setLoading] = useState(true);
+  const [lastPlayerEvent, setLastPlayerEvent] = useState(0);
 
   // Fetch initial session
   const fetchSession = async () => {
@@ -37,8 +44,17 @@ export const AuctionProvider = ({ children }) => {
     });
 
     socket.on('bid:placed', ({ team, amount }) => {
-      // We could use toast notifications here
-      console.log(`Bid placed by ${team.name} for ${amount}`);
+      toast(`Bid placed by ${team.name} for ₹${amount}`, { icon: '💰' });
+    });
+
+    socket.on('player:sold', ({ player, team, price }) => {
+      toast.success(`${player.name} sold to ${team.name} for ₹${price}!`);
+      setLastPlayerEvent(prev => prev + 1);
+    });
+
+    socket.on('player:unsold', ({ player }) => {
+      toast.error(`${player.name} went unsold.`);
+      setLastPlayerEvent(prev => prev + 1);
     });
 
     return () => {
@@ -46,6 +62,8 @@ export const AuctionProvider = ({ children }) => {
       socket.off('disconnect');
       socket.off('auction:update');
       socket.off('bid:placed');
+      socket.off('player:sold');
+      socket.off('player:unsold');
     };
   }, []);
 
@@ -53,7 +71,7 @@ export const AuctionProvider = ({ children }) => {
     session,
     isConnected,
     loading,
-    socket,
+    lastPlayerEvent,
     apiUrl: SOCKET_URL
   };
 

@@ -5,14 +5,15 @@ import StatusBadge from '../components/StatusBadge';
 import { Filter } from 'lucide-react';
 
 const PlayersPage = () => {
-  const { apiUrl, session } = useAuction();
+  const { apiUrl, lastPlayerEvent } = useAuction();
   const [players, setPlayers] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('All');
   const [skillFilter, setSkillFilter] = useState('All');
 
   useEffect(() => {
     fetchPlayers();
-  }, [session?.status]);
+  }, [lastPlayerEvent]);
 
   const fetchPlayers = async () => {
     try {
@@ -20,6 +21,8 @@ const PlayersPage = () => {
       setPlayers(res.data);
     } catch (err) {
       console.error('Error fetching players:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -92,10 +95,22 @@ const PlayersPage = () => {
                   </td>
                 </tr>
               ))}
+              {loading && players.length === 0 && (
+                Array.from({ length: 5 }).map((_, i) => (
+                  <tr key={i} className="border-b border-white/5 animate-pulse">
+                    <td className="px-6 py-4"><div className="h-4 bg-slate-700 rounded w-32"></div></td>
+                    <td className="px-6 py-4"><div className="h-4 bg-slate-700 rounded w-24"></div></td>
+                    <td className="px-6 py-4"><div className="h-4 bg-slate-700 rounded w-20"></div></td>
+                    <td className="px-6 py-4"><div className="h-4 bg-slate-700 rounded w-20"></div></td>
+                    <td className="px-6 py-4"><div className="h-4 bg-slate-700 rounded w-32"></div></td>
+                    <td className="px-6 py-4"><div className="h-4 bg-slate-700 rounded w-20"></div></td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
-        {filteredPlayers.length === 0 && (
+        {!loading && filteredPlayers.length === 0 && (
           <div className="text-center py-12 text-slate-500">
             No players match the current filters.
           </div>

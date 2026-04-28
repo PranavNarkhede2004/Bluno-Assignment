@@ -2,9 +2,10 @@ const mongoose = require('mongoose');
 const Player = require('../models/Player');
 const Team = require('../models/Team');
 const AuctionSession = require('../models/AuctionSession');
-require('dotenv').config({ path: '../.env' }); // Load .env if run directly
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') }); // Safely load .env from server root
 
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/npl_auction';
+const MONGO_URI = (process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/npl_auction').trim().replace(/^['"]|['"]$/g, '');
 
 const seedData = async () => {
   try {
@@ -40,10 +41,10 @@ const seedData = async () => {
     ];
 
     const teams = [
-      { name: 'Mumbai Mavericks', managerName: 'Aditya Sharma', budget: 15000 },
-      { name: 'Delhi Destroyers', managerName: 'Priya Kapoor', budget: 15000 },
-      { name: 'Bengaluru Blasters', managerName: 'Rohan Mehta', budget: 15000 },
-      { name: 'Chennai Champions', managerName: 'Sneha Iyer', budget: 15000 },
+      { shortId: 1, name: 'Mumbai Mavericks', managerName: 'Aditya Sharma', budget: 15000, initialBudget: 15000 },
+      { shortId: 2, name: 'Delhi Destroyers', managerName: 'Priya Kapoor', budget: 15000, initialBudget: 15000 },
+      { shortId: 3, name: 'Bengaluru Blasters', managerName: 'Rohan Mehta', budget: 15000, initialBudget: 15000 },
+      { shortId: 4, name: 'Chennai Champions', managerName: 'Sneha Iyer', budget: 15000, initialBudget: 15000 },
     ];
 
     await Player.insertMany(players);
