@@ -20,10 +20,5 @@
         }
       ]
     }
-  ],
-  "functions": {
-    "app/*.js": {
-      "maxDuration": 10
-    }
-  }
+  ]
 }
